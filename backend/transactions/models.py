@@ -17,6 +17,7 @@ class PurchaseHeader(models.Model):
     bill_date = models.DateField()
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_cancelled = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.bill_no} - {self.supplier.name}"

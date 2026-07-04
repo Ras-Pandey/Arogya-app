@@ -20,22 +20,23 @@ class PurchaseItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'medicine', 'batch_no', 'expiry_date', 'qty', 'mrp', 'purchase_rate']
 
 class PurchaseHeaderSerializer(serializers.ModelSerializer):
+    supplier_name = serializers.CharField(source='supplier.name', read_only=True)
     items = PurchaseItemSerializer(many=True) # Nested items
 
     class Meta:
         model = PurchaseHeader
-        fields = ['id', 'supplier', 'bill_no', 'bill_date', 'total_amount', 'items']
+        
+        fields = ['id', 'supplier','supplier_name', 'bill_no', 'bill_date', 'total_amount', 'is_cancelled', 'items']
 
-    # THE MAGIC TRIGGER: Bill save hote hi Stock update karna
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         purchase = PurchaseHeader.objects.create(**validated_data)
         
         for item_data in items_data:
-            # 1. Bill me item add karo
+            # 1. Purchase Item create karo
             PurchaseItem.objects.create(purchase=purchase, **item_data)
             
-            # 2. Stock Godam me dawai Plus (+) karo
+            # 2. Stock Update (Plus logic)
             stock, created = Stock.objects.get_or_create(
                 medicine=item_data['medicine'],
                 batch_no=item_data['batch_no'],
