@@ -1,5 +1,19 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
+import router from './router' // Router import kiya
 
-createApp(App).mount('#app')
+import PrimeVue from 'primevue/config'
+import Aura from '@primevue/themes/aura'
+
+const app = createApp(App)
+
+app.use(router) // Router activate kiya
+app.use(PrimeVue, {
+  theme: {
+    preset: Aura,
+    options: { darkModeSelector: 'none' }
+  }
+})
+
+app.mount('#app')
