@@ -3,8 +3,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Hamari masters api ke routes yahan attach ho jayenge
+    path('api/auth/', include('users.urls')), # Auth route added[cite: 1, 4]
     path('', include('masters.urls')), 
-    # Phase 3: Transactions & Stock
     path('api/transactions/', include('transactions.urls')),
 ]
