@@ -5,6 +5,7 @@ import router from './router' // Router import kiya
 
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
+import 'primeicons/primeicons.css' // Yeh line hona mandatory hai!
 
 const app = createApp(App)
 

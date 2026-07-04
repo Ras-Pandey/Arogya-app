@@ -59,6 +59,12 @@ const addItem = () => {
     currentItem.value = { medicine: null, batch_no: '', expiry_date: '', qty: null, mrp: null, purchase_rate: null }
 }
 
+// EDIT FUNCTION: Item ko wapas input grid mein laata hai
+const editItem = (item, index) => {
+    currentItem.value = { ...item }
+    items.value.splice(index, 1)
+}
+
 const removeItem = (index) => {
     items.value.splice(index, 1)
 }
@@ -188,9 +194,12 @@ onMounted(() => { fetchData() })
                         <span class="font-bold text-slate-800">₹ {{ (slotProps.data.qty * slotProps.data.purchase_rate).toFixed(2) }}</span>
                     </template>
                 </Column>
-                <Column header="" style="width: 60px; text-align: center;">
+                <Column header="Action" style="width: 100px; text-align: center;">
                     <template #body="slotProps">
-                        <Button icon="pi pi-trash" text rounded severity="danger" class="w-8 h-8 p-0" @click="removeItem(slotProps.index)" />
+                        <div class="flex gap-1 justify-center">
+                            <Button icon="pi pi-pencil" text rounded severity="info" class="w-8 h-8 p-0" @click="editItem(slotProps.data, slotProps.index)" />
+                            <Button icon="pi pi-trash" text rounded severity="danger" class="w-8 h-8 p-0" @click="removeItem(slotProps.index)" />
+                        </div>
                     </template>
                 </Column>
                 <template #empty>
@@ -210,42 +219,11 @@ onMounted(() => { fetchData() })
               <Button label="Save Entry [F10]" icon="pi pi-check" :loading="isSaving" @click="savePurchaseBill" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 border-none px-8 py-3 font-bold text-base shadow-sm" />
           </div>
       </div>
-
   </div>
 </template>
 
 <style>
-/* EXACT SIZING OVERRIDES
-  Ye rules ensure karte hain ki label ke neeche ka input border se bilkul na chipke
-  aur Dropdown, Input, Button teeno ki height strictly 42px rahe.
-*/
-
-.erp-input, 
-.erp-input .p-inputtext, 
-.erp-input.p-dropdown {
-    height: 42px !important;
-    border-radius: 6px;
-}
-
-.erp-input .p-inputtext {
-    padding: 0.5rem 0.75rem !important;
-    font-size: 14px !important;
-    display: flex;
-    align-items: center;
-}
-
-.erp-input.p-dropdown {
-    align-items: center;
-}
-
-.erp-btn {
-    height: 42px !important;
-    border-radius: 6px;
-}
-
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
-}
+.erp-input, .erp-input .p-inputtext, .erp-input.p-dropdown { height: 42px !important; border-radius: 6px; }
+.erp-btn { height: 42px !important; border-radius: 6px; }
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 </style>

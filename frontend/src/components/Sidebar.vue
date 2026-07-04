@@ -32,6 +32,9 @@
       <router-link to="/purchase" class="flex items-center px-4 py-2.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-colors" active-class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 shadow-sm">
         <i class="pi pi-shopping-cart mr-3"></i> Purchase (In)
       </router-link>
+      <router-link to="/purchase-list" class="flex items-center px-4 py-2.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-colors" active-class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 shadow-sm">
+        <i class="pi pi-list mr-3"></i> Purchase List
+      </router-link>
       <router-link to="/stock" class="flex items-center px-4 py-2.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-colors" active-class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 shadow-sm">
       <i class="pi pi-list mr-3"></i> Stock Register
       </router-link>

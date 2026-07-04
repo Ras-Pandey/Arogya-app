@@ -5,6 +5,8 @@ import SaltMaster from '../views/SaltMaster.vue'
 import SupplierMaster from '../views/SupplierMaster.vue'
 import PurchaseEntry from '../views/PurchaseEntry.vue'
 import StockRegister from '../views/StockRegister.vue'
+import PurchaseList from '../views/PurchaseList.vue' // Import
+
 
 const routes = [
   { path: '/', redirect: '/company' },
@@ -14,6 +16,7 @@ const routes = [
   { path: '/supplier', component: SupplierMaster },
   { path: '/purchase', component: PurchaseEntry },
   { path: '/stock', component: StockRegister },
+  { path: '/purchase-list', component: PurchaseList },
 ]
 
 const router = createRouter({
