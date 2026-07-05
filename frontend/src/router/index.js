@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-// IMPORT KO GLOBAL SCOPE SE HATA RAHE HAIN TAKI ERROR NA AAYE
+
+// Existing Imports
 import CompanyMaster from '../views/CompanyMaster.vue'
 import MedicineMaster from '../views/MedicineMaster.vue'
 import SaltMaster from '../views/SaltMaster.vue'
@@ -9,6 +10,8 @@ import PurchaseEntry from '../views/PurchaseEntry.vue'
 import StockRegister from '../views/StockRegister.vue'
 import PurchaseList from '../views/PurchaseList.vue'
 import LoginView from '../views/LoginView.vue'
+// Naya Import: Billing View
+import BillingView from '../views/BillingView.vue'
 
 const routes = [
   { path: '/', redirect: '/company' },
@@ -20,6 +23,7 @@ const routes = [
   { path: '/purchase', component: PurchaseEntry },
   { path: '/stock', component: StockRegister },
   { path: '/purchase-list', component: PurchaseList },
+  { path: '/billing', name: 'billing', component: BillingView },
 ]
 
 const router = createRouter({
@@ -27,27 +31,10 @@ const router = createRouter({
   routes,
 })
 
-// Navigation Guard (Logic yahan function ke andar hai)
-// router.beforeEach((to, from, next) => {
-//   // Yahan import karne se "Active Pinia" ka error nahi aayega
-//   import('../stores/auth').then(({ useAuthStore }) => {
-//     const authStore = useAuthStore()
-
-//     if (to.path !== '/login' && !authStore.isAuthenticated) {
-//       next('/login')
-//     } else if (to.path === '/login' && authStore.isAuthenticated) {
-//       next('/company')
-//     } else {
-//       next()
-//     }
-//   })
-// })
-
-// export default router
-
-
+// Updated Navigation Guard
 router.beforeEach((to) => {
   const authStore = useAuthStore()
+
   if (!authStore.isAuthenticated && to.path !== '/login') {
     return '/login'
   }

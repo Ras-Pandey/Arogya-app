@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import SupplierViewSet, PurchaseViewSet, StockViewSet
+from .views import SupplierViewSet, PurchaseViewSet, StockViewSet, InvoiceCreateView, AvailableStockView
 from . import views
 
 router = DefaultRouter()
@@ -11,4 +11,6 @@ router.register(r'stocks', StockViewSet) # Live Inventory Check karne ke liye
 urlpatterns = [
     path('', include(router.urls)),
     path('purchases/<int:pk>/cancel/', views.cancel_purchase, name='cancel-purchase'),
+    path('invoice/create/', InvoiceCreateView.as_view(), name='invoice-create'),
+    path('stock/available/', AvailableStockView.as_view(), name='available-stock'),
 ]
