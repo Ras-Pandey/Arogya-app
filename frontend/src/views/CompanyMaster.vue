@@ -138,11 +138,20 @@ const selectedCompany = ref(null)
 const companyForm = ref({ id: null, name: '', short_name: '' })
 const errors = ref({})
 
+// const fetchData = async () => {
+//   loading.value = true
+//   try {
+//     const response = await axios.get('/companies/')
+//     companies.value = response.data
+//   } catch (error) { console.error(error) } finally { loading.value = false }
+// }
+
 const fetchData = async () => {
   loading.value = true
   try {
     const response = await axios.get('/companies/')
-    companies.value = response.data
+    // Agar response.data undefined ho toh empty array set karein
+    companies.value = response.data || [] 
   } catch (error) { console.error(error) } finally { loading.value = false }
 }
 
@@ -179,7 +188,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
       </div>
       
       <div class="p-4">
-          <DataTable 
+          <DataTable v-if="companies"
             :value="companies" 
             :loading="loading" 
             v-model:selection="selectedCompany" 
