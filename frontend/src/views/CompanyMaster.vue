@@ -155,17 +155,39 @@ const fetchData = async () => {
   } catch (error) { console.error(error) } finally { loading.value = false }
 }
 
+// const saveCompany = async () => {
+//   if (!companyForm.value.name?.trim()) return (errors.value.name = "Required")
+//   isSaving.value = true
+//   try {
+//     if (isEditMode.value) await axios.put(`/companies/${companyForm.value.id}/`, companyForm.value)
+//     else await axios.post('/companies/', companyForm.value)
+//     showDialog.value = false
+//     fetchData()
+//   } finally { isSaving.value = false }
+// }
+
 const saveCompany = async () => {
   if (!companyForm.value.name?.trim()) return (errors.value.name = "Required")
   isSaving.value = true
   try {
-    if (isEditMode.value) await axios.put(`/companies/${companyForm.value.id}/`, companyForm.value)
-    else await axios.post('/companies/', companyForm.value)
-    showDialog.value = false
-    fetchData()
-  } finally { isSaving.value = false }
+    if (isEditMode.value) {
+      await axios.put(`/companies/${companyForm.value.id}/`, companyForm.value)
+    } else {
+      await axios.post('/companies/', companyForm.value)
+    }
+    showDialog.value = false;
+    
+    // Yahan await lagayein taaki list update hone ka wait kare
+    await fetchData(); 
+    
+    // Form reset karein
+    companyForm.value = { id: null, name: '', short_name: '' };
+  } catch (error) { 
+    console.error(error) 
+  } finally { 
+    isSaving.value = false 
+  }
 }
-
 const handleKeyDown = (event) => {
   if (event.key === 'F2') { showDialog.value = true; isEditMode.value = false; companyForm.value = {} }
   if (event.key === 'F3' && selectedCompany.value) { showDialog.value = true; isEditMode.value = true; companyForm.value = {...selectedCompany.value} }
