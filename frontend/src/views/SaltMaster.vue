@@ -1,91 +1,36 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
-import Button from 'primevue/button'
 
 const salts = ref([])
 const loading = ref(true)
 const showDialog = ref(false)
-const isSaving = ref(false)
 const isEditMode = ref(false)
-const selectedSalt = ref(null) // Table row selection track karega
-
+const selectedSalt = ref(null)
 const form = ref({ id: null, name: '', description: '' })
-const errors = ref({})
 
 const fetchData = async () => {
   loading.value = true
   try {
-    const response = await axios.get('/salts/')
-    salts.value = response.data
-  } catch (error) { console.error(error) } finally { loading.value = false }
-}
-
-const validateForm = () => {
-    errors.value = {}
-    if (!form.value.name.trim()) errors.value.name = "Salt Name is required."
-    return Object.keys(errors.value).length === 0
+    const res = await axios.get('/salts/')
+    salts.value = res.data
+  } finally { loading.value = false }
 }
 
 const saveSalt = async () => {
-  if (!validateForm()) return 
-  isSaving.value = true
-  try {
-    if (isEditMode.value) {
-      await axios.put(`/salts/${form.value.id}/`, form.value)
-    } else {
-      await axios.post('/salts/', form.value)
-    }
-    showDialog.value = false
-    form.value = { id: null, name: '', description: '' }
-    errors.value = {}
-    selectedSalt.value = null
-    fetchData() 
-  } catch (error) { console.error(error) } finally { isSaving.value = false }
-}
-
-const deleteSalt = async () => {
-    if (!selectedSalt.value) return
-    const confirmDelete = confirm(`Kya aap sach me '${selectedSalt.value.name}' ko delete karna chahte hain?`)
-    if (!confirmDelete) return
-    try {
-        await axios.delete(`/salts/${selectedSalt.value.id}/`)
-        selectedSalt.value = null
-        fetchData()
-    } catch (error) {
-        alert("Delete failed! Ye salt kisi medicine me use ho rha hai.")
-    }
+  if (isEditMode.value) await axios.put(`/salts/${form.value.id}/`, form.value)
+  else await axios.post('/salts/', form.value)
+  showDialog.value = false
+  fetchData()
 }
 
 const handleKeyDown = (event) => {
-  if (event.key === 'F2') { 
-      event.preventDefault()
-      isEditMode.value = false
-      form.value = { id: null, name: '', description: '' }
-      errors.value = {}
-      showDialog.value = true 
-  }
-  if (event.key === 'F3') {
-      event.preventDefault()
-      if (!selectedSalt.value) return alert("Pehle table me se koi Salt select karein!")
-      isEditMode.value = true
-      form.value = { ...selectedSalt.value }
-      errors.value = {}
-      showDialog.value = true
-  }
-  if (event.key === 'Delete' && !showDialog.value && selectedSalt.value) {
-      deleteSalt()
-  }
-  if (event.key === 'Escape' && showDialog.value) showDialog.value = false
-  if (event.key === 'F10' && showDialog.value) { event.preventDefault(); saveSalt() }
+  if (event.key === 'F2') { showDialog.value = true; isEditMode.value = false; form.value = {} }
+  if (event.key === 'F3' && selectedSalt.value) { showDialog.value = true; isEditMode.value = true; form.value = {...selectedSalt.value} }
+  if (event.key === 'F10' && showDialog.value) saveSalt()
 }
-
 onMounted(() => { fetchData(); window.addEventListener('keydown', handleKeyDown) })
-onUnmounted(() => { window.removeEventListener('keydown', handleKeyDown) })
+onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
 </script>
 
 <template>

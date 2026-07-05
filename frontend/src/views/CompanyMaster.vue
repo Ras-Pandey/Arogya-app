@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import DataTable from 'primevue/datatable'
@@ -122,6 +122,48 @@ const handleKeyDown = (event) => {
 
 onMounted(() => { fetchData(); window.addEventListener('keydown', handleKeyDown) })
 onUnmounted(() => { window.removeEventListener('keydown', handleKeyDown) })
+</script> -->
+
+
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import axios from 'axios'
+
+const companies = ref([])
+const loading = ref(true)
+const showDialog = ref(false)
+const isSaving = ref(false)
+const isEditMode = ref(false)
+const selectedCompany = ref(null)
+const companyForm = ref({ id: null, name: '', short_name: '' })
+const errors = ref({})
+
+const fetchData = async () => {
+  loading.value = true
+  try {
+    const response = await axios.get('/companies/')
+    companies.value = response.data
+  } catch (error) { console.error(error) } finally { loading.value = false }
+}
+
+const saveCompany = async () => {
+  if (!companyForm.value.name.trim()) return (errors.value.name = "Required")
+  isSaving.value = true
+  try {
+    if (isEditMode.value) await axios.put(`/companies/${companyForm.value.id}/`, companyForm.value)
+    else await axios.post('/companies/', companyForm.value)
+    showDialog.value = false
+    fetchData()
+  } finally { isSaving.value = false }
+}
+
+const handleKeyDown = (event) => {
+  if (event.key === 'F2') { showDialog.value = true; isEditMode.value = false; companyForm.value = {} }
+  if (event.key === 'F3' && selectedCompany.value) { showDialog.value = true; isEditMode.value = true; companyForm.value = {...selectedCompany.value} }
+  if (event.key === 'F10' && showDialog.value) saveCompany()
+}
+onMounted(() => { fetchData(); window.addEventListener('keydown', handleKeyDown) })
+onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
 </script>
 
 <template>

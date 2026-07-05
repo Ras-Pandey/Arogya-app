@@ -1,11 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
-import Button from 'primevue/button'
 
 const suppliers = ref([])
 const loading = ref(true)
@@ -13,79 +8,32 @@ const showDialog = ref(false)
 const isSaving = ref(false)
 const isEditMode = ref(false)
 const selectedSupplier = ref(null)
-
 const form = ref({ id: null, name: '', contact_no: '', gst_no: '' })
-const errors = ref({})
 
 const fetchData = async () => {
   loading.value = true
   try {
-    const response = await axios.get('/transactions/suppliers/')
-    suppliers.value = response.data
-  } catch (error) { console.error(error) } finally { loading.value = false }
-}
-
-const validateForm = () => {
-    errors.value = {}
-    if (!form.value.name.trim()) errors.value.name = "Supplier name is required."
-    return Object.keys(errors.value).length === 0
+    const res = await axios.get('/transactions/suppliers/')
+    suppliers.value = res.data
+  } finally { loading.value = false }
 }
 
 const saveSupplier = async () => {
-  if (!validateForm()) return 
   isSaving.value = true
-  try {
-    if (isEditMode.value) {
-      await axios.put(`/transactions/suppliers/${form.value.id}/`, form.value)
-    } else {
-      await axios.post('/transactions/suppliers/', form.value)
-    }
-    showDialog.value = false
-    form.value = { id: null, name: '', contact_no: '', gst_no: '' }
-    errors.value = {}
-    selectedSupplier.value = null
-    fetchData() 
-  } catch (error) { console.error(error) } finally { isSaving.value = false }
-}
-
-const deleteSupplier = async () => {
-    if (!selectedSupplier.value) return
-    const confirmDelete = confirm(`Kya aap sach me '${selectedSupplier.value.name}' ko delete karna chahte hain?`)
-    if (!confirmDelete) return
-    try {
-        await axios.delete(`/transactions/suppliers/${selectedSupplier.value.id}/`)
-        selectedSupplier.value = null
-        fetchData()
-    } catch (error) {
-        alert("Delete failed! Ye supplier kisi purchase bill se juda hua hai.")
-    }
+  if (isEditMode.value) await axios.put(`/transactions/suppliers/${form.value.id}/`, form.value)
+  else await axios.post('/transactions/suppliers/', form.value)
+  showDialog.value = false
+  fetchData()
+  isSaving.value = false
 }
 
 const handleKeyDown = (event) => {
-  if (event.key === 'F2') { 
-      event.preventDefault()
-      isEditMode.value = false
-      form.value = { id: null, name: '', contact_no: '', gst_no: '' }
-      errors.value = {}
-      showDialog.value = true 
-  }
-  if (event.key === 'F3') {
-      event.preventDefault()
-      if (!selectedSupplier.value) return alert("Pehle table me se koi Supplier select karein!")
-      isEditMode.value = true
-      form.value = { ...selectedSupplier.value }
-      errors.value = {}
-      showDialog.value = true
-  }
-  if (event.key === 'Delete' && !showDialog.value && selectedSupplier.value) {
-      deleteSupplier()
-  }
-  if (event.key === 'Escape' && showDialog.value) showDialog.value = false
-  if (event.key === 'F10' && showDialog.value) { event.preventDefault(); saveSupplier() }
+  if (event.key === 'F2') { showDialog.value = true; isEditMode.value = false; form.value = {} }
+  if (event.key === 'F3' && selectedSupplier.value) { showDialog.value = true; isEditMode.value = true; form.value = {...selectedSupplier.value} }
+  if (event.key === 'F10' && showDialog.value) saveSupplier()
 }
-
 onMounted(() => { fetchData(); window.addEventListener('keydown', handleKeyDown) })
-onUnmounted(() => { window.removeEventListener('keydown', handleKeyDown) })
+onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
 </script>
 
 <template>

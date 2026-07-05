@@ -1,12 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
-import Dropdown from 'primevue/dropdown'
-import Button from 'primevue/button'
 
 const medicines = ref([])
 const companies = ref([])
@@ -16,94 +10,37 @@ const showDialog = ref(false)
 const isSaving = ref(false)
 const isEditMode = ref(false)
 const selectedMedicine = ref(null)
-
 const form = ref({ id: null, name: '', company: null, salt: null, packing: '', hsn_code: '', tax_percentage: 12.00 })
-const errors = ref({})
 
 const fetchData = async () => {
   loading.value = true
   try {
     const [medRes, compRes, saltRes] = await Promise.all([
-      axios.get('medicines/'),
+      axios.get('/medicines/'),
       axios.get('/companies/'),
       axios.get('/salts/')
     ])
-    medicines.value = medRes.data
-    companies.value = compRes.data
-    salts.value = saltRes.data
+    medicines.value = medRes.data; companies.value = compRes.data; salts.value = saltRes.data
   } catch (error) { console.error(error) } finally { loading.value = false }
 }
 
-const validateForm = () => {
-    errors.value = {}
-    if (!form.value.name.trim()) errors.value.name = "Medicine name is required."
-    if (!form.value.company) errors.value.company = "Please select a company."
-    return Object.keys(errors.value).length === 0
-}
-
 const saveMedicine = async () => {
-  if (!validateForm()) return 
   isSaving.value = true
   try {
-    if (isEditMode.value) {
-      await axios.put(`/medicines/${form.value.id}/`, form.value)
-    } else {
-      await axios.post('/medicines/', form.value)
-    }
+    if (isEditMode.value) await axios.put(`/medicines/${form.value.id}/`, form.value)
+    else await axios.post('/medicines/', form.value)
     showDialog.value = false
-    form.value = { id: null, name: '', company: null, salt: null, packing: '', hsn_code: '', tax_percentage: 12.00 }
-    errors.value = {}
-    selectedMedicine.value = null
-    fetchData() 
-  } catch (error) { console.error(error) } finally { isSaving.value = false }
-}
-
-const deleteMedicine = async () => {
-    if (!selectedMedicine.value) return
-    const confirmDelete = confirm(`Kya aap sach me '${selectedMedicine.value.name}' ko delete karna chahte hain?`)
-    if (!confirmDelete) return
-    try {
-        await axios.delete(`http://127.0.0.1:8000/api/medicines/${selectedMedicine.value.id}/`)
-        selectedMedicine.value = null
-        fetchData()
-    } catch (error) { console.error(error) }
+    fetchData()
+  } finally { isSaving.value = false }
 }
 
 const handleKeyDown = (event) => {
-  if (event.key === 'F2') { 
-      event.preventDefault()
-      isEditMode.value = false
-      form.value = { id: null, name: '', company: null, salt: null, packing: '', hsn_code: '', tax_percentage: 12.00 }
-      errors.value = {}
-      showDialog.value = true 
-  }
-  if (event.key === 'F3') {
-      event.preventDefault()
-      if (!selectedMedicine.value) return alert("Pehle table me se koi Medicine select karein!")
-      isEditMode.value = true
-      
-      // Setup edit form fields with correct IDs for dropdowns
-      form.value = { 
-          id: selectedMedicine.value.id,
-          name: selectedMedicine.value.name,
-          company: selectedMedicine.value.company,
-          salt: selectedMedicine.value.salt,
-          packing: selectedMedicine.value.packing,
-          hsn_code: selectedMedicine.value.hsn_code,
-          tax_percentage: selectedMedicine.value.tax_percentage
-      }
-      errors.value = {}
-      showDialog.value = true
-  }
-  if (event.key === 'Delete' && !showDialog.value && selectedMedicine.value) {
-      deleteMedicine()
-  }
-  if (event.key === 'Escape' && showDialog.value) showDialog.value = false
-  if (event.key === 'F10' && showDialog.value) { event.preventDefault(); saveMedicine() }
+  if (event.key === 'F2') { showDialog.value = true; isEditMode.value = false; form.value = {} }
+  if (event.key === 'F3' && selectedMedicine.value) { showDialog.value = true; isEditMode.value = true; form.value = {...selectedMedicine.value} }
+  if (event.key === 'F10' && showDialog.value) saveMedicine()
 }
-
 onMounted(() => { fetchData(); window.addEventListener('keydown', handleKeyDown) })
-onUnmounted(() => { window.removeEventListener('keydown', handleKeyDown) })
+onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
 </script>
 
 <template>
