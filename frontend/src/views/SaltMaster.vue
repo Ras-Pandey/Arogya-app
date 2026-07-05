@@ -1,33 +1,62 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
 
 const salts = ref([])
 const loading = ref(true)
 const showDialog = ref(false)
+const isSaving = ref(false)
 const isEditMode = ref(false)
 const selectedSalt = ref(null)
 const form = ref({ id: null, name: '', description: '' })
+const errors = ref({})
 
 const fetchData = async () => {
   loading.value = true
   try {
     const res = await axios.get('/salts/')
-    salts.value = res.data
-  } finally { loading.value = false }
+    salts.value = Array.isArray(res.data) ? res.data : Object.values(res.data || {})
+  } catch (error) { 
+    console.error(error) 
+  } finally { 
+    loading.value = false 
+  }
 }
 
 const saveSalt = async () => {
-  if (isEditMode.value) await axios.put(`/salts/${form.value.id}/`, form.value)
-  else await axios.post('/salts/', form.value)
-  showDialog.value = false
-  fetchData()
+  if (!form.value.name?.trim()) { errors.value.name = "Required"; return; }
+  isSaving.value = true
+  try {
+    if (isEditMode.value) await axios.put(`/salts/${form.value.id}/`, form.value)
+    else await axios.post('/salts/', form.value)
+    
+    showDialog.value = false
+    await fetchData()
+    form.value = { id: null, name: '', description: '' }
+  } catch (error) {
+    console.error("Save Error:", error.response?.data || error.message);
+  } finally {
+    isSaving.value = false
+  }
 }
 
 const handleKeyDown = (event) => {
-  if (event.key === 'F2') { showDialog.value = true; isEditMode.value = false; form.value = {} }
-  if (event.key === 'F3' && selectedSalt.value) { showDialog.value = true; isEditMode.value = true; form.value = {...selectedSalt.value} }
-  if (event.key === 'F10' && showDialog.value) saveSalt()
+  if (event.key === 'F2') { 
+      event.preventDefault(); showDialog.value = true; isEditMode.value = false; 
+      form.value = { id: null, name: '', description: '' }; errors.value = {} 
+  }
+  if (event.key === 'F3' && selectedSalt.value) { 
+      event.preventDefault(); showDialog.value = true; isEditMode.value = true; 
+      form.value = {...selectedSalt.value}; errors.value = {} 
+  }
+  if (event.key === 'F10' && showDialog.value) {
+      event.preventDefault(); saveSalt()
+  }
 }
 onMounted(() => { fetchData(); window.addEventListener('keydown', handleKeyDown) })
 onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
@@ -47,9 +76,10 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
       </div>
       
       <div class="p-4">
-          <DataTable :value="salts" :loading="loading" v-model:selection="selectedSalt" selectionMode="single" dataKey="id" stripedRows hoverableRows class="p-datatable-sm text-sm cursor-pointer">
+          <DataTable v-if="salts" :value="salts" :loading="loading" v-model:selection="selectedSalt" selectionMode="single" dataKey="id" stripedRows hoverableRows class="p-datatable-sm text-sm cursor-pointer">
             <Column field="name" header="Salt Name" style="width: 40%"></Column>
             <Column field="description" header="Description" style="width: 60%"></Column>
+            <template #empty><div class="text-center p-4">No salts found. Press F2 to add.</div></template>
           </DataTable>
       </div>
 

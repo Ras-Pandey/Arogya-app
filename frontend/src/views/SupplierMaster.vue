@@ -1,6 +1,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
 
 const suppliers = ref([])
 const loading = ref(true)
@@ -9,28 +14,49 @@ const isSaving = ref(false)
 const isEditMode = ref(false)
 const selectedSupplier = ref(null)
 const form = ref({ id: null, name: '', contact_no: '', gst_no: '' })
+const errors = ref({})
 
 const fetchData = async () => {
   loading.value = true
   try {
     const res = await axios.get('/transactions/suppliers/')
-    suppliers.value = res.data
-  } finally { loading.value = false }
+    suppliers.value = Array.isArray(res.data) ? res.data : Object.values(res.data || {})
+  } catch (error) { 
+    console.error(error) 
+  } finally { 
+    loading.value = false 
+  }
 }
 
 const saveSupplier = async () => {
+  if (!form.value.name?.trim()) { errors.value.name = "Required"; return; }
   isSaving.value = true
-  if (isEditMode.value) await axios.put(`/transactions/suppliers/${form.value.id}/`, form.value)
-  else await axios.post('/transactions/suppliers/', form.value)
-  showDialog.value = false
-  fetchData()
-  isSaving.value = false
+  try {
+    if (isEditMode.value) await axios.put(`/transactions/suppliers/${form.value.id}/`, form.value)
+    else await axios.post('/transactions/suppliers/', form.value)
+    
+    showDialog.value = false
+    await fetchData()
+    form.value = { id: null, name: '', contact_no: '', gst_no: '' }
+  } catch (error) {
+    console.error("Save Error:", error.response?.data || error.message);
+  } finally {
+    isSaving.value = false
+  }
 }
 
 const handleKeyDown = (event) => {
-  if (event.key === 'F2') { showDialog.value = true; isEditMode.value = false; form.value = {} }
-  if (event.key === 'F3' && selectedSupplier.value) { showDialog.value = true; isEditMode.value = true; form.value = {...selectedSupplier.value} }
-  if (event.key === 'F10' && showDialog.value) saveSupplier()
+  if (event.key === 'F2') { 
+      event.preventDefault(); showDialog.value = true; isEditMode.value = false; 
+      form.value = { id: null, name: '', contact_no: '', gst_no: '' }; errors.value = {} 
+  }
+  if (event.key === 'F3' && selectedSupplier.value) { 
+      event.preventDefault(); showDialog.value = true; isEditMode.value = true; 
+      form.value = {...selectedSupplier.value}; errors.value = {} 
+  }
+  if (event.key === 'F10' && showDialog.value) {
+      event.preventDefault(); saveSupplier()
+  }
 }
 onMounted(() => { fetchData(); window.addEventListener('keydown', handleKeyDown) })
 onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
@@ -50,10 +76,11 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
       </div>
       
       <div class="p-4">
-          <DataTable :value="suppliers" :loading="loading" v-model:selection="selectedSupplier" selectionMode="single" dataKey="id" stripedRows hoverableRows class="p-datatable-sm text-sm cursor-pointer">
+          <DataTable v-if="suppliers" :value="suppliers" :loading="loading" v-model:selection="selectedSupplier" selectionMode="single" dataKey="id" stripedRows hoverableRows class="p-datatable-sm text-sm cursor-pointer">
             <Column field="name" header="Supplier Name" style="width: 50%"></Column>
             <Column field="contact_no" header="Contact No" style="width: 25%"></Column>
             <Column field="gst_no" header="GST No" style="width: 25%"></Column>
+            <template #empty><div class="text-center p-4">No suppliers found. Press F2 to add.</div></template>
           </DataTable>
       </div>
 

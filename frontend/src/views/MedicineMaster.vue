@@ -1,6 +1,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
+import Dropdown from 'primevue/dropdown'
 
 const medicines = ref([])
 const companies = ref([])
@@ -11,6 +17,7 @@ const isSaving = ref(false)
 const isEditMode = ref(false)
 const selectedMedicine = ref(null)
 const form = ref({ id: null, name: '', company: null, salt: null, packing: '', hsn_code: '', tax_percentage: 12.00 })
+const errors = ref({})
 
 const fetchData = async () => {
   loading.value = true
@@ -20,24 +27,53 @@ const fetchData = async () => {
       axios.get('/companies/'),
       axios.get('/salts/')
     ])
-    medicines.value = medRes.data; companies.value = compRes.data; salts.value = saltRes.data
-  } catch (error) { console.error(error) } finally { loading.value = false }
+    
+    // Bulletproof array handling for all 3 lists
+    medicines.value = Array.isArray(medRes.data) ? medRes.data : Object.values(medRes.data || {})
+    companies.value = Array.isArray(compRes.data) ? compRes.data : Object.values(compRes.data || {})
+    salts.value = Array.isArray(saltRes.data) ? saltRes.data : Object.values(saltRes.data || {})
+    
+  } catch (error) { 
+    console.error(error) 
+  } finally { 
+    loading.value = false 
+  }
 }
 
 const saveMedicine = async () => {
+  errors.value = {}
+  if (!form.value.name?.trim()) errors.value.name = "Medicine name required"
+  if (!form.value.company) errors.value.company = "Company is required"
+  if (Object.keys(errors.value).length > 0) return
+
   isSaving.value = true
   try {
     if (isEditMode.value) await axios.put(`/medicines/${form.value.id}/`, form.value)
     else await axios.post('/medicines/', form.value)
+    
     showDialog.value = false
-    fetchData()
-  } finally { isSaving.value = false }
+    await fetchData() // Wait for list update
+    form.value = { id: null, name: '', company: null, salt: null, packing: '', hsn_code: '', tax_percentage: 12.00 }
+  } catch (error) {
+    console.error("Save Error:", error.response?.data || error.message);
+    alert("Error saving medicine!");
+  } finally { 
+    isSaving.value = false 
+  }
 }
 
 const handleKeyDown = (event) => {
-  if (event.key === 'F2') { showDialog.value = true; isEditMode.value = false; form.value = {} }
-  if (event.key === 'F3' && selectedMedicine.value) { showDialog.value = true; isEditMode.value = true; form.value = {...selectedMedicine.value} }
-  if (event.key === 'F10' && showDialog.value) saveMedicine()
+  if (event.key === 'F2') { 
+      event.preventDefault(); showDialog.value = true; isEditMode.value = false; 
+      form.value = { id: null, name: '', company: null, salt: null, packing: '', hsn_code: '', tax_percentage: 12.00 }; errors.value = {} 
+  }
+  if (event.key === 'F3' && selectedMedicine.value) { 
+      event.preventDefault(); showDialog.value = true; isEditMode.value = true; 
+      form.value = {...selectedMedicine.value}; errors.value = {} 
+  }
+  if (event.key === 'F10' && showDialog.value) {
+      event.preventDefault(); saveMedicine()
+  }
 }
 onMounted(() => { fetchData(); window.addEventListener('keydown', handleKeyDown) })
 onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
@@ -57,7 +93,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
       </div>
       
       <div class="p-4">
-          <DataTable :value="medicines" :loading="loading" v-model:selection="selectedMedicine" selectionMode="single" dataKey="id" stripedRows hoverableRows class="p-datatable-sm text-sm cursor-pointer">
+          <DataTable v-if="medicines" :value="medicines" :loading="loading" v-model:selection="selectedMedicine" selectionMode="single" dataKey="id" stripedRows hoverableRows class="p-datatable-sm text-sm cursor-pointer">
             <Column field="name" header="Item Name"></Column>
             <Column field="packing" header="Packing"></Column>
             <Column field="company_name" header="Company"></Column>
@@ -66,6 +102,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeyDown))
                     <span class="font-bold text-emerald-600">{{ slotProps.data.tax_percentage }}%</span>
                 </template>
             </Column>
+            <template #empty><div class="text-center p-4">No medicines found. Press F2 to add.</div></template>
           </DataTable>
       </div>
 
