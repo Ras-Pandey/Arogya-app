@@ -12,7 +12,7 @@ const displayDialog = ref(false) // Dialog control karne ke liye
 
 const fetchBills = async () => {
     try {
-        const res = await axios.get('http://127.0.0.1:8000/api/transactions/purchases/')
+        const res = await axios.get('/transactions/purchases/')
         bills.value = res.data
     } catch (e) { console.error(e) }
 }
@@ -25,7 +25,7 @@ const showDetail = (bill) => {
 const cancelBill = async (id) => {
     if(confirm("Are you sure?")) {
         try {
-            await axios.post(`http://127.0.0.1:8000/api/transactions/purchases/${id}/cancel/`)
+            await axios.post(`/transactions/purchases/${id}/cancel/`)
             await fetchBills()
             displayDialog.value = false // Cancel ke baad dialog band
         } catch (e) { alert("Error!") }

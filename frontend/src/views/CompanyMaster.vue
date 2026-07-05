@@ -19,17 +19,17 @@ const selectedCompany = ref(null) // Naya: Table me select ki hui row
 const companyForm = ref({ id: null, name: '', short_name: '' })
 const errors = ref({})
 
-const fetchData = async () => {
-  loading.value = true
-  try {
-    const response = await axios.get('http://127.0.0.1:8000/api/companies/')
-    companies.value = response.data
-  } catch (error) {
-    console.error("API Error:", error)
-  } finally {
-    loading.value = false
-  }
-}
+// const fetchData = async () => {
+//   loading.value = true
+//   try {
+//     const response = await axios.get('http://127.0.0.1:8000/api/companies/')
+//     companies.value = response.data
+//   } catch (error) {
+//     console.error("API Error:", error)
+//   } finally {
+//     loading.value = false
+//   }
+// }
 
 // Validation Logic
 const validateForm = () => {
@@ -44,12 +44,10 @@ const saveCompany = async () => {
   isSaving.value = true
   try {
     if (isEditMode.value) {
-      // Edit API Call (PUT)
-      await axios.put(`http://127.0.0.1:8000/api/companies/${companyForm.value.id}/`, companyForm.value)
-    } else {
-      // Add API Call (POST)
-      await axios.post('http://127.0.0.1:8000/api/companies/', companyForm.value)
-    }
+    await axios.put(`/companies/${companyForm.value.id}/`, companyForm.value)
+} else {
+    await axios.post('/companies/', companyForm.value)
+}
     
     showDialog.value = false
     companyForm.value = { id: null, name: '', short_name: '' }
@@ -71,7 +69,7 @@ const deleteCompany = async () => {
     if (!confirmDelete) return
 
     try {
-        await axios.delete(`http://127.0.0.1:8000/api/companies/${selectedCompany.value.id}/`)
+        await axios.delete(`/companies/${selectedCompany.value.id}/`)
         selectedCompany.value = null // Selection clear karein
         fetchData()
     } catch (error) {

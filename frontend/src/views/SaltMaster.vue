@@ -20,7 +20,7 @@ const errors = ref({})
 const fetchData = async () => {
   loading.value = true
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/salts/')
+    const response = await axios.get('/salts/')
     salts.value = response.data
   } catch (error) { console.error(error) } finally { loading.value = false }
 }
@@ -36,9 +36,9 @@ const saveSalt = async () => {
   isSaving.value = true
   try {
     if (isEditMode.value) {
-      await axios.put(`http://127.0.0.1:8000/api/salts/${form.value.id}/`, form.value)
+      await axios.put(`/salts/${form.value.id}/`, form.value)
     } else {
-      await axios.post('http://127.0.0.1:8000/api/salts/', form.value)
+      await axios.post('/salts/', form.value)
     }
     showDialog.value = false
     form.value = { id: null, name: '', description: '' }
@@ -53,7 +53,7 @@ const deleteSalt = async () => {
     const confirmDelete = confirm(`Kya aap sach me '${selectedSalt.value.name}' ko delete karna chahte hain?`)
     if (!confirmDelete) return
     try {
-        await axios.delete(`http://127.0.0.1:8000/api/salts/${selectedSalt.value.id}/`)
+        await axios.delete(`/salts/${selectedSalt.value.id}/`)
         selectedSalt.value = null
         fetchData()
     } catch (error) {

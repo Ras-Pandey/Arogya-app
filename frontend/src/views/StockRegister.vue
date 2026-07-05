@@ -9,7 +9,7 @@ const loading = ref(true)
 
 const fetchStock = async () => {
     try {
-        const response = await axios.get('http://127.0.0.1:8000/api/transactions/stocks/')
+        const response = await axios.get('/transactions/stocks/')
         stocks.value = response.data
     } catch (error) { console.error(error) } finally { loading.value = false }
 }

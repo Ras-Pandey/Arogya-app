@@ -20,7 +20,7 @@ const errors = ref({})
 const fetchData = async () => {
   loading.value = true
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/transactions/suppliers/')
+    const response = await axios.get('/transactions/suppliers/')
     suppliers.value = response.data
   } catch (error) { console.error(error) } finally { loading.value = false }
 }
@@ -36,9 +36,9 @@ const saveSupplier = async () => {
   isSaving.value = true
   try {
     if (isEditMode.value) {
-      await axios.put(`http://127.0.0.1:8000/api/transactions/suppliers/${form.value.id}/`, form.value)
+      await axios.put(`/transactions/suppliers/${form.value.id}/`, form.value)
     } else {
-      await axios.post('http://127.0.0.1:8000/api/transactions/suppliers/', form.value)
+      await axios.post('/transactions/suppliers/', form.value)
     }
     showDialog.value = false
     form.value = { id: null, name: '', contact_no: '', gst_no: '' }
@@ -53,7 +53,7 @@ const deleteSupplier = async () => {
     const confirmDelete = confirm(`Kya aap sach me '${selectedSupplier.value.name}' ko delete karna chahte hain?`)
     if (!confirmDelete) return
     try {
-        await axios.delete(`http://127.0.0.1:8000/api/transactions/suppliers/${selectedSupplier.value.id}/`)
+        await axios.delete(`/transactions/suppliers/${selectedSupplier.value.id}/`)
         selectedSupplier.value = null
         fetchData()
     } catch (error) {

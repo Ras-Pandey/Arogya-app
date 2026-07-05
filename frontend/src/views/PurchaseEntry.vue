@@ -35,8 +35,8 @@ const totalAmount = computed(() => {
 const fetchData = async () => {
     try {
         const [supRes, medRes] = await Promise.all([
-            axios.get('http://127.0.0.1:8000/api/transactions/suppliers/'),
-            axios.get('http://127.0.0.1:8000/api/medicines/')
+            axios.get('/transactions/suppliers/'),
+            axios.get('/medicines/')
         ])
         suppliers.value = supRes.data
         medicines.value = medRes.data
@@ -92,7 +92,7 @@ const savePurchaseBill = async () => {
             }))
         }
 
-        await axios.post('http://127.0.0.1:8000/api/transactions/purchases/', payload)
+        await axios.post('/transactions/purchases/', payload)
         alert("Bill Saved & Stock Updated Successfully! 🎉")
         
         header.value = { supplier: null, bill_no: '', bill_date: new Date().toISOString().split('T')[0] }

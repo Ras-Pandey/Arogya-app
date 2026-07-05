@@ -24,9 +24,9 @@ const fetchData = async () => {
   loading.value = true
   try {
     const [medRes, compRes, saltRes] = await Promise.all([
-      axios.get('http://127.0.0.1:8000/api/medicines/'),
-      axios.get('http://127.0.0.1:8000/api/companies/'),
-      axios.get('http://127.0.0.1:8000/api/salts/')
+      axios.get('medicines/'),
+      axios.get('/companies/'),
+      axios.get('/salts/')
     ])
     medicines.value = medRes.data
     companies.value = compRes.data
@@ -46,9 +46,9 @@ const saveMedicine = async () => {
   isSaving.value = true
   try {
     if (isEditMode.value) {
-      await axios.put(`http://127.0.0.1:8000/api/medicines/${form.value.id}/`, form.value)
+      await axios.put(`/medicines/${form.value.id}/`, form.value)
     } else {
-      await axios.post('http://127.0.0.1:8000/api/medicines/', form.value)
+      await axios.post('/medicines/', form.value)
     }
     showDialog.value = false
     form.value = { id: null, name: '', company: null, salt: null, packing: '', hsn_code: '', tax_percentage: 12.00 }
