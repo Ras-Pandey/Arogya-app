@@ -156,7 +156,7 @@ const fetchData = async () => {
 }
 
 const saveCompany = async () => {
-  if (!companyForm.value.name.trim()) return (errors.value.name = "Required")
+  if (!companyForm.value.name?.trim()) return (errors.value.name = "Required")
   isSaving.value = true
   try {
     if (isEditMode.value) await axios.put(`/companies/${companyForm.value.id}/`, companyForm.value)
