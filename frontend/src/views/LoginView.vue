@@ -67,8 +67,8 @@ const toggleMode = () => {
 const handleSubmit = async () => {
   try {
     const url = isLogin.value 
-      ? 'http://localhost:8000/api/auth/login/' 
-      : 'http://localhost:8000/api/auth/signup/';
+      ? 'https://raspandey.pythonanywhere.com/api/auth/login/' 
+      : 'https://raspandey.pythonanywhere.com/api/auth/signup/';
     
     // Payload logic fix: Login ke liye sirf user/pass, Signup ke liye pura form
     const payload = isLogin.value 
@@ -92,14 +92,14 @@ const handleSubmit = async () => {
 
 const fetchQuestion = async () => {
   try {
-    const res = await axios.post('http://localhost:8000/api/auth/get-question/', { username: forgot.value.username });
+    const res = await axios.post('https://raspandey.pythonanywhere.com/api/auth/get-question/', { username: forgot.value.username });
     forgot.value.question = res.data.question;
   } catch { alert('User not found!'); }
 };
 
 const resetPassword = async () => {
   try {
-    await axios.post('http://localhost:8000/api/auth/reset-password/', forgot.value);
+    await axios.post('https://raspandey.pythonanywhere.com/api/auth/reset-password/', forgot.value);
     alert('Password successfully reset!');
     showForgot.value = false;
   } catch { alert('Invalid answer or request failed!'); }

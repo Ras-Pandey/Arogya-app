@@ -163,7 +163,7 @@ const grandTotal = computed(() => cart.value.reduce((acc, item) => acc + (item.q
 const fetchActiveStock = async () => {
   isLoading.value = true;
   try {
-    const response = await axios.get('http://localhost:8000/api/transactions/stock/available/');
+    const response = await axios.get('https://raspandey.pythonanywhere.com/api/transactions/stock/available/');
     allActiveStock.value = response.data;
   } catch (error) {
     console.error("Error fetching stock:", error);
@@ -251,7 +251,7 @@ const saveAndPrint = async () => {
       }))
     };
 
-    await axios.post('http://localhost:8000/api/transactions/invoice/create/', payload);
+    await axios.post('https://raspandey.pythonanywhere.com/api/transactions/invoice/create/', payload);
     window.print();
     
     // Reset Everything
