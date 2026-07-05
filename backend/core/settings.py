@@ -129,6 +129,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://arogya-app.vercel.app",  # Apne Vercel ka URL yahan dalein
+]
+CORS_ALLOW_ALL_ORIGINS = False # False kar dein aur upar wali list use karein
 AUTH_USER_MODEL = 'users.UserProfile'
 ALLOWED_HOSTS = ['*']
